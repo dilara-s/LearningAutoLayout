@@ -7,11 +7,18 @@
 
 import UIKit
 
+private enum Layout {
+    static let spacing: CGFloat = 12
+    static let sideInset: CGFloat = 16
+    static let textSize: CGFloat = 20
+    static let cornerRadius: CGFloat = 40
+}
+
 class ViewController: UIViewController {
     let titles: [[String]] = [
         ["AC", "±", "%", "÷"],
-        ["7", "8", "9", "x"],
-        ["4", "5", "6", "-"],
+        ["7", "8", "9", "×"],
+        ["4", "5", "6", "−"],
         ["1", "2", "3", "+"]
     ]
 
@@ -19,7 +26,7 @@ class ViewController: UIViewController {
         let label = UILabel()
         label.text = "0"
         label.textColor = .white
-        label.font = .boldSystemFont(ofSize: 16)
+        label.font = .boldSystemFont(ofSize: Layout.textSize)
         label.backgroundColor = .systemGray
         label.textAlignment = .right
         return label
@@ -40,8 +47,8 @@ class ViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            label.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            label.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            label.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -Layout.sideInset),
+            label.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: Layout.sideInset),
         ])
     }
     
@@ -51,11 +58,11 @@ class ViewController: UIViewController {
     
     func makeButton(title: String) -> UIButton {
         let button = UIButton()
-        button.setTitle("\(title)", for: UIControl.State.normal)
+        button.setTitle(title, for: UIControl.State.normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(button)
         
-        button.layer.cornerRadius = 40
+        button.layer.cornerRadius = Layout.cornerRadius
         button.backgroundColor = .systemBlue
         
         button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
@@ -63,17 +70,17 @@ class ViewController: UIViewController {
         return button
     }
     
-    func makeRow(row: [String]) -> UIStackView{
+    func makeRow(titles: [String]) -> UIStackView{
         let stackView = UIStackView()
         
-        for i in row {
-            stackView.addArrangedSubview(makeButton(title: i))
+        for title in titles {
+            stackView.addArrangedSubview(makeButton(title: title))
         }
         
         stackView.axis = .horizontal
         
         stackView.distribution = .fillEqually
-        stackView.spacing = 12
+        stackView.spacing = Layout.spacing
         
         return stackView
     }
@@ -82,22 +89,22 @@ class ViewController: UIViewController {
     func setupButtonStack() {
         let verticalStackView = UIStackView()
         
-        for i in titles {
-            verticalStackView.addArrangedSubview(makeRow(row: i))
+        for row in titles {
+            verticalStackView.addArrangedSubview(makeRow(titles: row))
         }
         
         verticalStackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(verticalStackView)
         
         NSLayoutConstraint.activate([
-            verticalStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            verticalStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            verticalStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: Layout.sideInset),
+            verticalStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -Layout.sideInset),
             verticalStackView.widthAnchor.constraint(equalTo: verticalStackView.heightAnchor),
             verticalStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
         
         verticalStackView.axis = .vertical
-        verticalStackView.spacing = 12
+        verticalStackView.spacing = Layout.spacing
         verticalStackView.distribution = .fillEqually
         
     }
