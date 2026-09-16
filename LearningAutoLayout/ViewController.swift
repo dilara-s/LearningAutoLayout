@@ -10,9 +10,10 @@ import UIKit
 private enum Layout {
     static let spacing: CGFloat = 12
     static let sideInset: CGFloat = 16
-    static let fontSize: CGFloat = 20
+    static let fontSize: CGFloat = 80
     static let cornerRadius: CGFloat = 40
     static let bottomInset: CGFloat = 16
+    static let gridInset: CGFloat = 16
 }
 
 class ViewController: UIViewController {
@@ -40,13 +41,15 @@ class ViewController: UIViewController {
         return buttonStack
     }()
 
-    let label: UILabel = {
+    lazy var label: UILabel = {
         let label = UILabel()
-        label.text = "0"
+        label.text = "123456789012"
         label.textColor = .white
         label.font = .boldSystemFont(ofSize: Layout.fontSize)
         label.backgroundColor = .systemGray
         label.textAlignment = .right
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.5
         return label
     }()
     
@@ -55,8 +58,8 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         print("Экран загрузился")
         view.backgroundColor = .systemBackground
-        setupLabel()
         setupButtonStack()
+        setupLabel()
     }
     
     func setupLabel() {
@@ -64,9 +67,9 @@ class ViewController: UIViewController {
         view.addSubview(label)
         
         NSLayoutConstraint.activate([
-            label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             label.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -Layout.sideInset),
             label.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: Layout.sideInset),
+            label.bottomAnchor.constraint(equalTo: buttonStack.topAnchor, constant: -Layout.gridInset)
         ])
     }
     
@@ -80,6 +83,7 @@ class ViewController: UIViewController {
         
         button.layer.cornerRadius = Layout.cornerRadius
         button.backgroundColor = .systemBlue
+        button.titleLabel?.font = .systemFont(ofSize: 32, weight: .bold)
 
         if isSquare {
             NSLayoutConstraint.activate([
@@ -88,7 +92,6 @@ class ViewController: UIViewController {
         }
         
         button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-        
         return button
     }
     
@@ -109,11 +112,7 @@ class ViewController: UIViewController {
     func makeLastRow() -> UIStackView {
         let lastRowStackView = UIStackView()
         for title in lastRow {
-            if title == "0" {
-                lastRowStackView.addArrangedSubview(makeButton(title: title, isSquare: false))
-            } else {
-                lastRowStackView.addArrangedSubview(makeButton(title: title))
-            }
+            lastRowStackView.addArrangedSubview(makeButton(title: title, isSquare: title != "0"))
         }
         
         lastRowStackView.axis = .horizontal
