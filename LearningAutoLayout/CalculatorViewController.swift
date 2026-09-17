@@ -81,17 +81,18 @@ class CalculatorViewController: UIViewController {
     func makeButton(title: String, isSquare: Bool = true) -> UIButton {
         let button = UIButton()
         button.setTitle(title, for: UIControl.State.normal)
-        
         button.layer.cornerRadius = Layout.cornerRadius
         button.backgroundColor = .systemBlue
         button.titleLabel?.font = .systemFont(ofSize: Layout.buttonFontSize, weight: .bold)
+        //button.clipsToBounds = true
 
         if isSquare {
             NSLayoutConstraint.activate([
                 button.widthAnchor.constraint(equalTo: button.heightAnchor)
             ])
         }
-        
+        //button.layer.cornerRadius = button.frame.height / 2
+        print(button.frame)
         button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         return button
     }
