@@ -10,13 +10,14 @@ import UIKit
 private enum Layout {
     static let spacing: CGFloat = 12
     static let sideInset: CGFloat = 16
-    static let fontSize: CGFloat = 80
+    static let displayFontSize: CGFloat = 80
+    static let buttonFontSize: CGFloat = 32
     static let cornerRadius: CGFloat = 40
     static let bottomInset: CGFloat = 16
     static let gridInset: CGFloat = 16
 }
 
-class ViewController: UIViewController {
+class CalculatorViewController: UIViewController {
     let titles: [[String]] = [
         ["AC", "±", "%", "÷"],
         ["7", "8", "9", "×"],
@@ -41,11 +42,11 @@ class ViewController: UIViewController {
         return buttonStack
     }()
 
-    lazy var label: UILabel = {
+    let label: UILabel = {
         let label = UILabel()
-        label.text = "123456789012"
+        label.text = "0"
         label.textColor = .white
-        label.font = .boldSystemFont(ofSize: Layout.fontSize)
+        label.font = .boldSystemFont(ofSize: Layout.displayFontSize)
         label.backgroundColor = .systemGray
         label.textAlignment = .right
         label.adjustsFontSizeToFitWidth = true
@@ -83,7 +84,7 @@ class ViewController: UIViewController {
         
         button.layer.cornerRadius = Layout.cornerRadius
         button.backgroundColor = .systemBlue
-        button.titleLabel?.font = .systemFont(ofSize: 32, weight: .bold)
+        button.titleLabel?.font = .systemFont(ofSize: Layout.buttonFontSize, weight: .bold)
 
         if isSquare {
             NSLayoutConstraint.activate([
