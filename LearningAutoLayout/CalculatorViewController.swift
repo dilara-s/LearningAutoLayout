@@ -19,24 +19,23 @@ private enum Layout {
     static let sideInset: CGFloat = 16
     static let displayFontSize: CGFloat = 80
     static let buttonFontSize: CGFloat = 32
-    static let cornerRadius: CGFloat = 40
     static let bottomInset: CGFloat = 16
     static let gridInset: CGFloat = 16
 }
 
-class CalculatorViewController: UIViewController {
-    let titles: [[String]] = [
+final class CalculatorViewController: UIViewController {
+    private let titles: [[String]] = [
         ["AC", "±", "%", "÷"],
         ["7", "8", "9", "×"],
         ["4", "5", "6", "−"],
         ["1", "2", "3", "+"],
     ]
     
-    let lastRow: [String] = [
+    private let lastRow: [String] = [
         "0", ",", "="
     ]
     
-    lazy var buttonStack: UIStackView = {
+    private lazy var buttonStack: UIStackView = {
         let buttonStack = UIStackView()
         for row in titles {
             buttonStack.addArrangedSubview(makeRow(titles: row))
@@ -49,12 +48,10 @@ class CalculatorViewController: UIViewController {
         return buttonStack
     }()
 
-    let label: UILabel = {
+    private let label: UILabel = {
         let label = UILabel()
         label.text = "0"
-        label.textColor = .white
         label.font = .boldSystemFont(ofSize: Layout.displayFontSize)
-        label.backgroundColor = .systemGray
         label.textAlignment = .right
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.5
@@ -70,7 +67,7 @@ class CalculatorViewController: UIViewController {
         setupLabel()
     }
     
-    func setupLabel() {
+    private func setupLabel() {
         label.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(label)
         
@@ -83,29 +80,36 @@ class CalculatorViewController: UIViewController {
         ])
     }
     
-    @objc func buttonTapped() {
+    @objc private func buttonTapped() {
         print("button pressed")
     }
     
-    func makeButton(title: String, isSquare: Bool = true) -> UIButton {
+    private func makeButton(title: String, isSquare: Bool = true) -> UIButton {
         let button = RoundButton()
         button.setTitle(title, for: UIControl.State.normal)
-        button.backgroundColor = .systemBlue
+        
+        button.backgroundColor = backgroundColor(for: title)
         button.titleLabel?.font = .systemFont(ofSize: Layout.buttonFontSize, weight: .bold)
 
         if isSquare {
             let squareConstraint = button.widthAnchor.constraint(equalTo: button.heightAnchor)
             squareConstraint.priority = UILayoutPriority(rawValue: 500.0)
             squareConstraint.isActive = true
-//            NSLayoutConstraint.activate([
-//                button.widthAnchor.constraint(equalTo: button.heightAnchor)
-//            ])
         }
         button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         return button
     }
     
-    func makeRow(titles: [String]) -> UIStackView {
+    private func backgroundColor(for title: String) -> UIColor {
+        switch title {
+        case "AC", "±", "%":          return .systemGray3
+        case "÷", "×", "−", "+", "=": return .systemOrange
+        default:                      return .systemGray
+        }
+    
+    }
+    
+    private func makeRow(titles: [String]) -> UIStackView {
         let stackView = UIStackView()
         
         for title in titles {
@@ -119,7 +123,7 @@ class CalculatorViewController: UIViewController {
         return stackView
     }
     
-    func makeLastRow() -> UIStackView {
+    private func makeLastRow() -> UIStackView {
         let zero = makeButton(title: "0", isSquare: false)
         let comma = makeButton(title: ",")
         let equals = makeButton(title: "=")
@@ -138,7 +142,7 @@ class CalculatorViewController: UIViewController {
         return lastRowStackView
     }
     
-    func setupButtonStack() {
+    private func setupButtonStack() {
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(buttonStack)
         
