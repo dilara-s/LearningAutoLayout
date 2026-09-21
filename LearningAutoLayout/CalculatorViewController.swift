@@ -75,6 +75,8 @@ class CalculatorViewController: UIViewController {
         view.addSubview(label)
         
         NSLayoutConstraint.activate([
+            label.topAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.topAnchor,
+                                       constant: Layout.sideInset),
             label.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -Layout.sideInset),
             label.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: Layout.sideInset),
             label.bottomAnchor.constraint(equalTo: buttonStack.topAnchor, constant: -Layout.gridInset)
@@ -90,12 +92,14 @@ class CalculatorViewController: UIViewController {
         button.setTitle(title, for: UIControl.State.normal)
         button.backgroundColor = .systemBlue
         button.titleLabel?.font = .systemFont(ofSize: Layout.buttonFontSize, weight: .bold)
-        button.clipsToBounds = true
 
         if isSquare {
-            NSLayoutConstraint.activate([
-                button.widthAnchor.constraint(equalTo: button.heightAnchor)
-            ])
+            let squareConstraint = button.widthAnchor.constraint(equalTo: button.heightAnchor)
+            squareConstraint.priority = UILayoutPriority(rawValue: 500.0)
+            squareConstraint.isActive = true
+//            NSLayoutConstraint.activate([
+//                button.widthAnchor.constraint(equalTo: button.heightAnchor)
+//            ])
         }
         button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         return button
@@ -116,14 +120,20 @@ class CalculatorViewController: UIViewController {
     }
     
     func makeLastRow() -> UIStackView {
-        let lastRowStackView = UIStackView()
-        for title in lastRow {
-            lastRowStackView.addArrangedSubview(makeButton(title: title, isSquare: title != "0"))
-        }
+        let zero = makeButton(title: "0", isSquare: false)
+        let comma = makeButton(title: ",")
+        let equals = makeButton(title: "=")
         
+        let lastRowStackView = UIStackView(arrangedSubviews: [zero, comma, equals])
         lastRowStackView.axis = .horizontal
         lastRowStackView.spacing = Layout.spacing
         lastRowStackView.distribution = .fill
+        
+        NSLayoutConstraint.activate([
+            comma.widthAnchor.constraint(equalTo: equals.widthAnchor),
+            zero.widthAnchor.constraint(equalTo: comma.widthAnchor, multiplier: 2, constant: Layout.spacing)
+        ])
+        
         
         return lastRowStackView
     }
