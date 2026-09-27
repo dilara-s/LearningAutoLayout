@@ -13,5 +13,5 @@ DAY 1:
 
 4)высоту объекту можно задать через heightAnchor(equalToConstant:) вместо привязки к safeArea родительского view.
 
-5)
+5)чтобы сделать кнопку круглой, можно написать класс RoundButton для кнопки и задать ей в методе layoutSubviews() layout.cornerRadius = bounds.height / 2
         

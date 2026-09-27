@@ -7,13 +7,6 @@
 
 import UIKit
 
-final class RoundButton: UIButton {
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        layer.cornerRadius = bounds.height / 2
-    }
-}
-
 private enum Layout {
     static let spacing: CGFloat = 12
     static let sideInset: CGFloat = 16
@@ -24,6 +17,9 @@ private enum Layout {
 }
 
 final class CalculatorViewController: UIViewController {
+    
+    private let calculator = Calculator()
+    
     private let titles: [[String]] = [
         ["AC", "±", "%", "÷"],
         ["7", "8", "9", "×"],
@@ -80,8 +76,17 @@ final class CalculatorViewController: UIViewController {
         ])
     }
     
-    @objc private func buttonTapped() {
-        print("button pressed")
+    @objc private func buttonTapped(_ sender: UIButton) {
+        guard let buttonTitle = sender.currentTitle else {return}
+        if buttonTitle == "," {
+            calculator.inputComma()
+        } else if let digit = Int(buttonTitle) {
+            calculator.inputDigit(String(digit))
+            print("digit pressed")
+        }
+        
+        label.text = calculator.show()
+        print("button \(buttonTitle) pressed")
     }
     
     private func makeButton(title: String, isSquare: Bool = true) -> UIButton {
@@ -96,7 +101,7 @@ final class CalculatorViewController: UIViewController {
             squareConstraint.priority = UILayoutPriority(rawValue: 500.0)
             squareConstraint.isActive = true
         }
-        button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
         return button
     }
     
