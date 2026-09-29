@@ -80,14 +80,23 @@ final class CalculatorViewController: UIViewController {
         guard let buttonTitle = sender.currentTitle else {return}
         if buttonTitle == "," {
             calculator.inputComma()
+            label.text = calculator.show()
         } else if let digit = Int(buttonTitle) {
             calculator.inputDigit(String(digit))
-            print("digit pressed")
+            label.text = calculator.show()
+        } else if let operation = operation(for: buttonTitle) {
+            calculator.inputOperation(operation)
+            label.text = calculator.show()
+        } else if buttonTitle == "=" {
+            calculator.calculateButtonPressed()
+            label.text = calculator.showResult()
         }
         
-        label.text = calculator.show()
+            
         print("button \(buttonTitle) pressed")
+        print(calculator.calculationsList)
     }
+
     
     private func makeButton(title: String, isSquare: Bool = true) -> UIButton {
         let button = RoundButton()
@@ -111,8 +120,18 @@ final class CalculatorViewController: UIViewController {
         case "÷", "×", "−", "+", "=": return .systemOrange
         default:                      return .systemGray
         }
-    
     }
+    
+    private func operation(for operation: String) -> Operations? {
+        switch operation {
+        case "+": return .add
+        case "−": return .subtract
+        case "÷": return .divide
+        case "×": return .multiply
+        default : return nil
+        }
+    }
+    
     
     private func makeRow(titles: [String]) -> UIStackView {
         let stackView = UIStackView()

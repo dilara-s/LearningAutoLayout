@@ -8,10 +8,8 @@
 import Foundation
 
 enum Operations: String {
-    case add = "+"
-    case substract = "−"
-    case multiply = "×"
-    case divide = "÷"
-    case percent = "%"
-    case changeSign = "±"
+    case add
+    case subtract
+    case multiply
+    case divide
 }
