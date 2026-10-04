@@ -12,47 +12,89 @@ enum CalculationsListItem {
     case operation(Operations)
 }
 
+enum State {
+    case typing
+    case awaitingSecondNumber
+    case result(Double)
+}
+
 final class Calculator {
-    var stringResult: String?
-    var doubleResult: Double?
+    private var state: State = .typing
+    
     var inputs: [String] = []
     var calculationsList: [CalculationsListItem] = []
     
     func inputDigit(_ digit: String) {
-        if inputs.isEmpty && digit == "0" { return }
-        if inputs.filter({ $0 != ","}).count >= 12 { return }
+        switch state {
+        case .typing:
+            break
+        case .awaitingSecondNumber:
+            state = .typing
+        case .result:
+            inputs.removeAll()
+            calculationsList.removeAll()
+            self.state = .typing
+        }
+        
+        if (inputs.isEmpty && digit == "0") { return }
+        if (inputs.filter( {$0 != ","} ).count >= 12) { return }
         inputs.append(digit)
     }
     
     func inputComma() {
+        switch self.state {
+        case .typing:
+            break
+        case .awaitingSecondNumber:
+            state = .typing
+        case .result:
+            calculationsList.removeAll()
+            state = .typing
+        }
         if inputs.contains(",") { return }
         if inputs.isEmpty { inputs.append("0") }
         inputs.append(",")
+    }
+    
+    func inputOperation(_ operation: Operations) {
+        switch state {
+        case .typing:
+            if inputs.isEmpty { return }
+            closeNumber()
+            state = .awaitingSecondNumber
+        case .awaitingSecondNumber:
+            calculationsList.removeLast()
+        case .result(let value):
+            calculationsList.removeAll()
+            calculationsList.append(.number(value))
+            state = .awaitingSecondNumber
+        }
+        calculationsList.append(.operation(operation))
     }
     
     func closeNumber() {
         let el = inputs.joined().replacingOccurrences(of: ",", with: ".")
         guard let number = Double(el) else { return }
         calculationsList.append(.number(number))
-    }
-    
-    func inputOperation(_ operation: Operations) {
-        closeNumber()
-        calculationsList.append(.operation(operation))
         inputs.removeAll()
     }
     
     func calculate() {
-        closeNumber()
+        switch state {
+        case .typing: break
+        case .awaitingSecondNumber, .result: return
+        }
         
+        closeNumber()
         var pending: Operations?
-        var result: Double?
+        var result: Double = 0
+        if calculationsList.isEmpty { return }
     
         for item in calculationsList {
             switch item{
             case .number(let value):
-                if let operation = pending, let current = result {
-                    result = apply(operation, current, value)
+                if let operation = pending {
+                    result = apply(operation, result, value)
                     pending = nil
                 } else {
                     result = value
@@ -62,18 +104,17 @@ final class Calculator {
             }
         }
         
-        doubleResult = result
-        toString(result)
-        inputs.removeAll()
+        state = .result(result)
     }
-    // по нажатию на кнопку равно у нас должна выполниться фнукция calculate() и на экран должен быть выведен резульатт то есть label.text = result. при этом из calcutions list должны удалиться все эеленты. тое сть нужно проверка: если мы прододлажем выичлсения то оставим как calculationList[0] = результат последнего вычисления, а если мы вводим новую цифру, то у нас должно все сборсить
-    func toString(_ result: Double?) {
+    
+    func toString(_ result: Double?) -> String{
         let formatter = NumberFormatter()
-        
+        formatter.numberStyle = .decimal
         let numberObject = NSNumber(value: result ?? 0.0)
         if let formattedString = formatter.string(from: numberObject) {
-            self.stringResult = formattedString
+            return formattedString
         }
+        return "Error"
     }
     
     func apply(_ operation: Operations, _ number1: Double, _ number2: Double) -> Double {
@@ -86,22 +127,11 @@ final class Calculator {
     }
 
     func show() -> String {
-        if inputs.isEmpty { return "0" }
-        return inputs.joined(separator: "")
-    }
-    
-    func showResult() -> String {
-        guard let number = stringResult else { return "" }
-        return number
-    }
-    
-    func calculateButtonPressed() {
-        calculate()
-        if let calculationResult = doubleResult {
-            calculationsList.append(.number(calculationResult))
+        switch state {
+        case .typing, .awaitingSecondNumber:
+            return inputs.isEmpty ? "0" : inputs.joined()
+        case .result(let result):
+            return toString(result)
         }
     }
-    
-    // вввожу первео число, операцию, второе число, равно и выводится результат. когда нажимаю следующее число, выводится второе число (то есть number2). то есть новая цифра почему-то дописывается сзади не результата а сзади числа которое number2 было
-
 }

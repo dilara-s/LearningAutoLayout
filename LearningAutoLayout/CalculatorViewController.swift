@@ -80,19 +80,15 @@ final class CalculatorViewController: UIViewController {
         guard let buttonTitle = sender.currentTitle else {return}
         if buttonTitle == "," {
             calculator.inputComma()
-            label.text = calculator.show()
         } else if let digit = Int(buttonTitle) {
             calculator.inputDigit(String(digit))
-            label.text = calculator.show()
         } else if let operation = operation(for: buttonTitle) {
             calculator.inputOperation(operation)
-            label.text = calculator.show()
         } else if buttonTitle == "=" {
-            calculator.calculateButtonPressed()
-            label.text = calculator.showResult()
+            calculator.calculate()
         }
         
-            
+        label.text = calculator.show()
         print("button \(buttonTitle) pressed")
         print(calculator.calculationsList)
     }

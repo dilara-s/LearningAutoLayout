@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+//enum State {
+//    case typing
+//    case result
+//    case waiting
+//}
