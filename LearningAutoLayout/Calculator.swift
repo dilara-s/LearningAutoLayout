@@ -22,6 +22,8 @@ enum State {
 final class Calculator {
     private var state: State = .typing
     
+    private let formatter = DisplayFormatter()
+    
     private var inputs: [String] = []
     private var isNegative = false
     private(set) var calculationsList: [CalculationsListItem] = []
@@ -144,16 +146,6 @@ final class Calculator {
         }
     }
     
-    private func toString(_ result: Double?) -> String{
-        let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "ru_RU")
-        formatter.numberStyle = .decimal
-        let numberObject = NSNumber(value: result ?? 0.0)
-        if let formattedString = formatter.string(from: numberObject) {
-            return formattedString
-        }
-        return "Error"
-    }
     
     private func apply(_ operation: Operations, _ number1: Double, _ number2: Double) throws -> Double {
         switch operation {
@@ -171,10 +163,9 @@ final class Calculator {
     func show() -> String {
         switch state {
         case .typing, .awaitingSecondNumber:
-            let digit = inputs.isEmpty ? "0" : inputs.joined()
-            return isNegative ? "−" + digit : digit
+            return formatter.formatTyped(inputs, isNegative: isNegative)
         case .result(let result):
-            return toString(result)
+            return formatter.format(result)
         case .error:
             return "Ошибка"
         }
