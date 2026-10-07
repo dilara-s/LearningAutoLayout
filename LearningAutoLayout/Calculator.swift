@@ -22,8 +22,18 @@ enum State {
 final class Calculator {
     private var state: State = .typing
     
-    var inputs: [String] = []
-    var calculationsList: [CalculationsListItem] = []
+    private var inputs: [String] = []
+    private var isNegative = false
+    private(set) var calculationsList: [CalculationsListItem] = []
+    
+    var hasCurrentInput: Bool {
+        switch state {
+        case .typing:
+            return !inputs.isEmpty
+        case .awaitingSecondNumber, .result, .error:
+            return false
+        }
+    }
     
     func inputDigit(_ digit: String) {
         switch state {
@@ -41,7 +51,6 @@ final class Calculator {
         
         if inputs == ["0"] { inputs.removeAll() }
         
-//        if (inputs.isEmpty && digit == "0") { return }
         if (inputs.filter( {$0 != ","} ).count >= 12) { return }
         inputs.append(digit)
     }
@@ -81,11 +90,26 @@ final class Calculator {
         calculationsList.append(.operation(operation))
     }
     
-    func closeNumber() {
-        let el = inputs.joined().replacingOccurrences(of: ",", with: ".")
-        guard let number = Double(el) else { return }
-        calculationsList.append(.number(number))
+    private func currentNumber() -> Double? {
+        let text = inputs.joined().replacingOccurrences(of: ",", with: ".")
+        return Double(text)
+    }
+    
+    private func setCurrentNumber(_ number: Double) {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.numberStyle = .decimal
+        formatter.usesGroupingSeparator = false
+        formatter.maximumFractionDigits = 12
+        let text = formatter.string(from: NSNumber(value: number)) ?? "0"
+        inputs = text.map { String($0) }
+    }
+    
+    private func closeNumber() {
+        guard let number = currentNumber() else { return }
+        calculationsList.append(.number(isNegative ? -number : number))
         inputs.removeAll()
+        isNegative = false
     }
     
     func calculate() {
@@ -120,7 +144,7 @@ final class Calculator {
         }
     }
     
-    func toString(_ result: Double?) -> String{
+    private func toString(_ result: Double?) -> String{
         let formatter = NumberFormatter()
         formatter.locale = Locale(identifier: "ru_RU")
         formatter.numberStyle = .decimal
@@ -131,7 +155,7 @@ final class Calculator {
         return "Error"
     }
     
-    func apply(_ operation: Operations, _ number1: Double, _ number2: Double) throws -> Double {
+    private func apply(_ operation: Operations, _ number1: Double, _ number2: Double) throws -> Double {
         switch operation {
         case .add:      return number1 + number2
         case .multiply: return number1 * number2
@@ -147,7 +171,8 @@ final class Calculator {
     func show() -> String {
         switch state {
         case .typing, .awaitingSecondNumber:
-            return inputs.isEmpty ? "0" : inputs.joined()
+            let digit = inputs.isEmpty ? "0" : inputs.joined()
+            return isNegative ? "−" + digit : digit
         case .result(let result):
             return toString(result)
         case .error:
@@ -157,7 +182,44 @@ final class Calculator {
     
     func clear() {
         inputs.removeAll()
+        isNegative = false
         calculationsList.removeAll()
         state = .typing
+    }
+    
+    func clearCurrentInput() {
+        switch state {
+        case .typing:
+            break
+        case .awaitingSecondNumber, .result, .error:
+            return
+        }
+        
+        inputs.removeAll()
+        isNegative = false
+        state = calculationsList.isEmpty ? .typing : .awaitingSecondNumber
+    }
+    
+    func changeSign() {
+        switch state {
+        case .typing:
+            isNegative.toggle()
+        case .result(let value):
+            state = .result(-value)
+        case .awaitingSecondNumber, .error:
+            return
+        }
+    }
+    
+    func calculatePercent() {
+        switch state {
+        case .typing:
+            guard let number = currentNumber() else { return }
+            setCurrentNumber(number / 100)
+        case .result(let value):
+            state = .result(value / 100)
+        case .awaitingSecondNumber, .error:
+            return
+        }
     }
 }

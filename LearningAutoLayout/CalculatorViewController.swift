@@ -20,6 +20,8 @@ final class CalculatorViewController: UIViewController {
     
     private let calculator = Calculator()
     
+    private var clearButton: UIButton?
+    
     private let titles: [[String]] = [
         ["AC", "±", "%", "÷"],
         ["7", "8", "9", "×"],
@@ -86,11 +88,18 @@ final class CalculatorViewController: UIViewController {
             calculator.inputOperation(operation)
         } else if buttonTitle == "AC" {
             calculator.clear()
+        } else if buttonTitle == "C" {
+            calculator.clearCurrentInput()
+        } else if buttonTitle == "±"{
+            calculator.changeSign()
+        } else if buttonTitle == "%"{
+            calculator.calculatePercent()
         } else if buttonTitle == "=" {
             calculator.calculate()
         }
         
         label.text = calculator.show()
+        clearButton?.setTitle(calculator.hasCurrentInput ? "C" : "AC", for: .normal)
         print("button \(buttonTitle) pressed")
         print(calculator.calculationsList)
     }
@@ -106,6 +115,10 @@ final class CalculatorViewController: UIViewController {
             let squareConstraint = button.widthAnchor.constraint(equalTo: button.heightAnchor)
             squareConstraint.priority = UILayoutPriority(rawValue: 500.0)
             squareConstraint.isActive = true
+        }
+        
+        if title == "AC" {
+            clearButton = button
         }
         button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
         return button
