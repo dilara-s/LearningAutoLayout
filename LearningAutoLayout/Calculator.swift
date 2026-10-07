@@ -16,6 +16,7 @@ enum State {
     case typing
     case awaitingSecondNumber
     case result(Double)
+    case error
 }
 
 final class Calculator {
@@ -34,9 +35,13 @@ final class Calculator {
             inputs.removeAll()
             calculationsList.removeAll()
             self.state = .typing
+        case .error:
+            return
         }
         
-        if (inputs.isEmpty && digit == "0") { return }
+        if inputs == ["0"] { inputs.removeAll() }
+        
+//        if (inputs.isEmpty && digit == "0") { return }
         if (inputs.filter( {$0 != ","} ).count >= 12) { return }
         inputs.append(digit)
     }
@@ -50,6 +55,8 @@ final class Calculator {
         case .result:
             calculationsList.removeAll()
             state = .typing
+        case .error:
+            return
         }
         if inputs.contains(",") { return }
         if inputs.isEmpty { inputs.append("0") }
@@ -68,6 +75,8 @@ final class Calculator {
             calculationsList.removeAll()
             calculationsList.append(.number(value))
             state = .awaitingSecondNumber
+        case .error:
+            return
         }
         calculationsList.append(.operation(operation))
     }
@@ -82,7 +91,7 @@ final class Calculator {
     func calculate() {
         switch state {
         case .typing: break
-        case .awaitingSecondNumber, .result: return
+        case .awaitingSecondNumber, .result, .error: return
         }
         
         closeNumber()
@@ -90,25 +99,30 @@ final class Calculator {
         var result: Double = 0
         if calculationsList.isEmpty { return }
     
-        for item in calculationsList {
-            switch item{
-            case .number(let value):
-                if let operation = pending {
-                    result = apply(operation, result, value)
-                    pending = nil
-                } else {
-                    result = value
+        do {
+            for item in calculationsList {
+                switch item{
+                case .number(let value):
+                    if let operation = pending {
+                        result = try apply(operation, result, value)
+                        pending = nil
+                    } else {
+                        result = value
+                    }
+                case .operation(let operation):
+                    pending = operation
                 }
-            case .operation(let operation):
-                pending = operation
             }
+            
+            state = .result(result)
+        } catch {
+            state = .error
         }
-        
-        state = .result(result)
     }
     
     func toString(_ result: Double?) -> String{
         let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
         formatter.numberStyle = .decimal
         let numberObject = NSNumber(value: result ?? 0.0)
         if let formattedString = formatter.string(from: numberObject) {
@@ -117,11 +131,15 @@ final class Calculator {
         return "Error"
     }
     
-    func apply(_ operation: Operations, _ number1: Double, _ number2: Double) -> Double {
+    func apply(_ operation: Operations, _ number1: Double, _ number2: Double) throws -> Double {
         switch operation {
         case .add:      return number1 + number2
         case .multiply: return number1 * number2
-        case .divide:   return number1 / number2
+        case .divide:
+            guard number2 != 0 else {
+                throw CalculationError.dividedByZero
+            }
+            return number1 / number2
         case .subtract: return number1 - number2
         }
     }
@@ -132,6 +150,14 @@ final class Calculator {
             return inputs.isEmpty ? "0" : inputs.joined()
         case .result(let result):
             return toString(result)
+        case .error:
+            return "Ошибка"
         }
+    }
+    
+    func clear() {
+        inputs.removeAll()
+        calculationsList.removeAll()
+        state = .typing
     }
 }

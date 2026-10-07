@@ -84,6 +84,8 @@ final class CalculatorViewController: UIViewController {
             calculator.inputDigit(String(digit))
         } else if let operation = operation(for: buttonTitle) {
             calculator.inputOperation(operation)
+        } else if buttonTitle == "AC" {
+            calculator.clear()
         } else if buttonTitle == "=" {
             calculator.calculate()
         }
@@ -92,7 +94,6 @@ final class CalculatorViewController: UIViewController {
         print("button \(buttonTitle) pressed")
         print(calculator.calculationsList)
     }
-
     
     private func makeButton(title: String, isSquare: Bool = true) -> UIButton {
         let button = RoundButton()
