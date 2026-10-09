@@ -56,6 +56,14 @@ final class CalculatorViewController: UIViewController {
         return label
     }()
     
+    private let historyButton: UIButton = {
+        let button = UIButton(type: .system)
+        let image = UIImage(systemName: "clock.fill")
+        button.setImage(image, for: .normal)
+        button.tintColor = .systemGray
+        button.addTarget(self, action: #selector(historyButtonTapped(_:)), for: .touchUpInside)
+        return button
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,6 +71,7 @@ final class CalculatorViewController: UIViewController {
         view.backgroundColor = .systemBackground
         setupButtonStack()
         setupLabel()
+        setupHistoryButton()
     }
     
     private func setupLabel() {
@@ -184,6 +193,20 @@ final class CalculatorViewController: UIViewController {
             buttonStack.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: Layout.sideInset),
             buttonStack.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -Layout.sideInset),
             buttonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Layout.bottomInset)
+        ])
+    }
+    
+    @objc private func historyButtonTapped(_ sender: UIButton) {
+        navigationController?.pushViewController(HistoryViewController(), animated: false)
+    }
+    
+    func setupHistoryButton() {
+        historyButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(historyButton)
+        
+        NSLayoutConstraint.activate([
+            historyButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            historyButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: Layout.sideInset),
         ])
     }
 }
